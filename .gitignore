@@ -24,6 +24,10 @@ hs_err_pid*
 
 #mvn
 .mvn/
+.classpath
+.project
+.settings/
+target/
 
 ### IntelliJ IDEA ###
 .idea
