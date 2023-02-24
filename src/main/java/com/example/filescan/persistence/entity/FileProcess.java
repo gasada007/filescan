@@ -23,7 +23,7 @@ public class FileProcess {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private FileProcessStatus status;
-    
+
     @Column(nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastCheckDate;

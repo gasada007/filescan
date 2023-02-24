@@ -37,10 +37,8 @@ public class FileProcessorService {
         this.fileProcessRepository = fileProcessRepository;
     }
 
-    @Scheduled(fixedDelay = 10000 * 60, initialDelay = 1000 * 5)
+    @Scheduled(fixedDelay = 1000 * 60, initialDelay = 1000 * 5)
     public void processFiles() {
-        LOGGER.info("File process starting!");
-
         Set<File> files = Stream.of(new File(processDir).listFiles()).filter(file -> !file.isDirectory()).collect(Collectors.toSet());
 
         LOGGER.info("Found files. Count: {}", files.size());
@@ -57,8 +55,6 @@ public class FileProcessorService {
                 file.renameTo(new File(failedDir + "/" + file.getName()));
             }
         }
-
-        LOGGER.info("File process finished!");
     }
 
     private FileProcess createFileProcess(String fileName, String flowId) {

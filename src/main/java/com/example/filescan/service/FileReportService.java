@@ -34,8 +34,6 @@ public class FileReportService {
 
     @Scheduled(fixedDelay = 1000 * 60, initialDelay = 1000 * 15)
     public void fileReports() {
-        LOGGER.info("File reports starting!");
-
         List<FileProcess> files = fileProcessRepository.findByStatus(FileProcessStatus.IN_PROGRESS);
 
         LOGGER.info("Found file process. Count: {}", files.size());
@@ -62,7 +60,5 @@ public class FileReportService {
                 LOGGER.warn("Error during [{}] file reports", file.getFlowId(), e);
             }
         }
-
-        LOGGER.info("File reports finished!");
     }
 }
