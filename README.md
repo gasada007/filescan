@@ -5,9 +5,8 @@ FileScan app is a Spring Boot Rest Application for analyzing threats in files
 ## Description
 
 * Start your application (Read more about this below)
-* Copy your files into `files/process` package
-* After the analysis is completed you can check the result into `files/report` package
-* The reports collection and scan is a scheduled task, run in every minute (default) and store in progress data too
+* Copy your files into `files/process` package and wait for schedule run in every minute (default) or trigger with endpoint
+* After the analysis is completed you can check the result into `files/report` package, but these report files also contain in progress data
 * The report name is contains the file name and the flow id which is the unique id of scan
 
 ## Tech tree
@@ -43,13 +42,18 @@ You can change the settings in `application.properties` but the default is h2 me
 
 You can use with mysql database too, but if you want this you have to install database software on your device
 
+### Swagger
+
+http://localhost:8081/FileScan/swagger-ui/index.html
+
 ### Endpoints
 
 POST http://localhost:8081/FileScan/api/scan/file send file for analyzing
+    form-data key is "file" and attach a file
 
 GET http://localhost:8081/FileScan/api/scan/trigger trigger the file process and report flow
 
-GET http://127.0.0.1:8081/FileScan/api/report?flowId=YOUR_FLOW_ID give back the report of scan
+GET http://localhost:8081/FileScan/api/report?flowId=YOUR_FLOW_ID give back the report of scan
 
 ### Useful knowledge about application
 
