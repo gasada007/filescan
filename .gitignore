@@ -34,3 +34,14 @@ target/
 *.iws
 *.iml
 *.ipr
+
+# Project specify settings
+files/failed
+files/finished
+files/process
+files/report
+
+run/files/failed
+run/files/finished
+run/files/process
+run/files/report
