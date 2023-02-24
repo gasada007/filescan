@@ -24,6 +24,12 @@ public class FileScanController {
         this.fileReportService = fileReportService;
     }
 
+    /**
+     * Analyze a file and give back report
+     *
+     * @param file file for analyze
+     * @return report of analyze
+     */
     @RequestMapping(method = POST, path = "file", consumes = MediaType.ALL_VALUE)
 //    String scanFile(@RequestPart("file") File file) {
     String scanFile(@RequestBody File file) {
@@ -31,7 +37,10 @@ public class FileScanController {
         return "";
     }
 
-    @RequestMapping(method = GET, path = "files")
+    /**
+     * Trigger the file process and report
+     */
+    @RequestMapping(method = GET, path = "trigger")
     void scanFiles() {
         fileProcessorService.processFiles();
         fileReportService.fileReports();

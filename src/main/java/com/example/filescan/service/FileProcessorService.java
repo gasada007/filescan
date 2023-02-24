@@ -37,18 +37,20 @@ public class FileProcessorService {
         this.fileProcessRepository = fileProcessRepository;
     }
 
-    @Scheduled(fixedDelay = 1000 * 60, initialDelay = 1000 * 5)
+    /**
+     * This method is responsible for collect and send files for scan
+     */
+    @Scheduled(fixedDelayString = "${file.processor.delayInSecond}", initialDelay = 1000 * 5)
     public void processFiles() {
         Set<File> files = Stream.of(new File(processDir).listFiles()).filter(file -> !file.isDirectory()).collect(Collectors.toSet());
 
-        LOGGER.info("Found files. Count: {}", files.size());
+        LOGGER.info("Found files for report. Count: {}", files.size());
 
         for (File file : files) {
             try {
                 ScanResponse response = fileScanIOClient.scanFile(file);
-                LOGGER.info("Response: {}", response);
-                fileProcessRepository.save(createFileProcess(file.getName(), response.getFlowId()));
-
+                LOGGER.debug("Response: {}", response);
+                saveFileProcess(file.getName(), response.getFlowId());
                 file.renameTo(new File(finishedDir + "/" + file.getName()));
             } catch (Exception e) {
                 LOGGER.warn("Error during [{}] file process", file.getName(), e);
@@ -57,12 +59,18 @@ public class FileProcessorService {
         }
     }
 
-    private FileProcess createFileProcess(String fileName, String flowId) {
+    /**
+     * Create an entity object for FileProcess
+     *
+     * @param fileName name of file which was analyzed
+     * @param flowId unique id of analyze
+     */
+    private void saveFileProcess(String fileName, String flowId) {
         FileProcess fileProcess = new FileProcess();
         fileProcess.setFileName(fileName);
         fileProcess.setFlowId(flowId);
         fileProcess.setLastCheckDate(new Date());
         fileProcess.setStatus(FileProcessStatus.IN_PROGRESS);
-        return fileProcess;
+        fileProcessRepository.save(fileProcess);
     }
 }
