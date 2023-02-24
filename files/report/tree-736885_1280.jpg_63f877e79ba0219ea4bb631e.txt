@@ -1,0 +1,1 @@
+File analyze is finished. Result: FinalVerdict(verdict=INFORMATIONAL, threatLevel=0.1, confidence=1.0)
