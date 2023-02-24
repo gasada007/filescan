@@ -1,19 +1,17 @@
-package com.example.filescan.web;
+package com.example.filescan.rest;
 
 import com.example.filescan.service.FileProcessorService;
 import com.example.filescan.service.FileReportService;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.io.File;
+import org.springframework.web.multipart.MultipartFile;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @RestController
-@RequestMapping("api/scan")
+@RequestMapping("api")
 public class FileScanController {
 
     private final FileProcessorService fileProcessorService;
@@ -27,20 +25,30 @@ public class FileScanController {
     /**
      * Analyze a file and give back report
      *
-     * @param file file for analyze
-     * @return report of analyze
+     * @param multipartFile file for analyze
+     * @return the current report of analyze
      */
-    @RequestMapping(method = POST, path = "file", consumes = MediaType.ALL_VALUE)
-//    String scanFile(@RequestPart("file") File file) {
-    String scanFile(@RequestBody File file) {
-        fileProcessorService.processFiles();
-        return "";
+    @RequestMapping(method = POST, path = "scan/file")
+    String scanFile(@RequestParam("file") MultipartFile multipartFile) {
+        String flowId = fileProcessorService.processMultipartFile(multipartFile);
+        if (flowId == null) {
+            return null;
+        }
+        return fileReportService.getFileReport(flowId);
     }
 
     /**
      * Trigger the file process and report
      */
-    @RequestMapping(method = GET, path = "trigger")
+    @RequestMapping(method = GET, path = "report")
+    String getReport(@RequestParam("flowId") String flowId) {
+        return fileReportService.getFileReport(flowId);
+    }
+
+    /**
+     * Trigger the file process and report
+     */
+    @RequestMapping(method = GET, path = "scan/trigger")
     void scanFiles() {
         fileProcessorService.processFiles();
         fileReportService.fileReports();

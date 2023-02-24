@@ -8,7 +8,6 @@ import com.example.filescan.persistence.entity.FileProcess;
 import com.example.filescan.persistence.repo.FileProcessRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -21,13 +20,12 @@ public class FileReportService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileReportService.class);
 
-    @Value("${files.report.dir}")
-    private String reportDir;
-
+    private final PackageService packageService;
     private final FileScanIOClient fileScanIOClient;
     private final FileProcessRepository fileProcessRepository;
 
-    public FileReportService(FileScanIOClient fileScanIOClient, FileProcessRepository fileProcessRepository) {
+    public FileReportService(PackageService packageService, FileScanIOClient fileScanIOClient, FileProcessRepository fileProcessRepository) {
+        this.packageService = packageService;
         this.fileScanIOClient = fileScanIOClient;
         this.fileProcessRepository = fileProcessRepository;
     }
@@ -37,31 +35,67 @@ public class FileReportService {
      */
     @Scheduled(fixedDelayString = "${file.report.delayInSecond}", initialDelay = 1000 * 15)
     public void fileReports() {
+        packageService.createMissingFolders();
+
         List<FileProcess> files = fileProcessRepository.findByStatus(FileProcessStatus.IN_PROGRESS);
 
         LOGGER.info("Found file for scan. Count: {}", files.size());
 
-        for (FileProcess file : files) {
-            try {
-                ReportResponse response = fileScanIOClient.report(file.getFlowId());
-                LOGGER.debug("Response: {}", response);
+        files.forEach(this::fileReport);
+    }
 
-                String fileData = "File analyze is in progress.";
-                Report report = response.getReports().values().stream().findFirst().orElse(null);
-                if (response.isAllFinished() && report != null && report.getFinalVerdict() != null) {
-                    file.setStatus(FileProcessStatus.FINISHED);
-                    fileData = "File analyze is finished. Result: " + report.getFinalVerdict().toString();
-                }
+    /**
+     * This method is responsible for report of file
+     *
+     * @param file file which for report
+     * @return the current result of scan
+     */
+    private String fileReport(FileProcess file) {
+        try {
+            String flowId = file.getFlowId();
+            ReportResponse response = fileScanIOClient.report(flowId);
+            LOGGER.debug("Response: {}", response);
 
-                file.setLastCheckDate(new Date());
-                fileProcessRepository.save(file);
-
-                FileWriter myWriter = new FileWriter(reportDir + "/" + file.getFileName() + "_" + file.getFlowId() + ".txt");
-                myWriter.write(fileData);
-                myWriter.close();
-            } catch (Exception e) {
-                LOGGER.warn("Error during [{}] file reports", file.getFlowId(), e);
+            String responseData = String.format("File analyze is in progress. Check in report package (%s) later or call use the endpoint. FlowId: %s"
+                    , packageService.reportDir, flowId);
+            Report report = response.getReports().values().stream().findFirst().orElse(null);
+            if (response.isAllFinished() && report != null && report.getFinalVerdict() != null) {
+                file.setStatus(FileProcessStatus.FINISHED);
+                responseData = String.format("File analyze is finished. Result: %s , FlowId: %s", report.getFinalVerdict(), flowId);
             }
+
+            file.setLastCheckDate(new Date());
+            file.setResponse(responseData);
+            fileProcessRepository.save(file);
+
+            FileWriter myWriter = new FileWriter(packageService.reportDir + "/" + file.getFileName() + "_" + flowId + ".txt");
+            myWriter.write(responseData);
+            myWriter.close();
+            return responseData;
+        } catch (Exception e) {
+            LOGGER.warn("Error during [{}] file reports", file.getFlowId(), e);
         }
+        return null;
+    }
+
+    /**
+     * This method give back report result if exist
+     *
+     * @param flowId unique id of scan
+     * @return the current result of scan
+     */
+    public String getFileReport(String flowId) {
+        FileProcess fileProcess = fileProcessRepository.findById(flowId).orElse(null);
+        if (fileProcess == null) {
+            //TODO for future if the application shut down forget every file process
+            return "Not existed file process by flow id";
+        }
+
+        if (fileProcess.getStatus() == FileProcessStatus.FINISHED) {
+            return fileProcess.getResponse();
+        }
+
+        packageService.createMissingFolders();
+        return fileReport(fileProcess);
     }
 }

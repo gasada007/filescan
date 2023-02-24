@@ -27,4 +27,7 @@ public class FileProcess {
     @Column(nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastCheckDate;
+
+    @Column
+    private String response;
 }
