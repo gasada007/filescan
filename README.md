@@ -18,6 +18,7 @@ FileScan app is a Spring Boot Rest Application for analyzing threats in files
 - [JPA] - db operations
 - [H2 or MySQL] - database
 - [Maven] - software project management and build tool
+- [Groovy, Spock] - Test framework
 
 ## Installation
 
