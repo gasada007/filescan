@@ -28,6 +28,6 @@ public class FileProcess {
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastCheckDate;
 
-    @Column
+    @Column(length = 5000)
     private String response;
 }

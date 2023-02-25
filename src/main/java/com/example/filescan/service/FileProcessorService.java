@@ -1,10 +1,7 @@
 package com.example.filescan.service;
 
 import com.example.filescan.dependencie.FileScanIOClient;
-import com.example.filescan.model.FileProcessStatus;
 import com.example.filescan.model.ScanResponse;
-import com.example.filescan.persistence.entity.FileProcess;
-import com.example.filescan.persistence.repo.FileProcessRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -15,7 +12,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Date;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -26,14 +22,12 @@ public class FileProcessorService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileProcessorService.class);
 
-    private final PackageService packageService;
+    private final CommonService commonService;
     private final FileScanIOClient fileScanIOClient;
-    private final FileProcessRepository fileProcessRepository;
 
-    public FileProcessorService(PackageService packageService, FileScanIOClient fileScanIOClient, FileProcessRepository fileProcessRepository) {
-        this.packageService = packageService;
+    public FileProcessorService(CommonService commonService, FileScanIOClient fileScanIOClient) {
+        this.commonService = commonService;
         this.fileScanIOClient = fileScanIOClient;
-        this.fileProcessRepository = fileProcessRepository;
     }
 
     /**
@@ -41,12 +35,12 @@ public class FileProcessorService {
      */
     @Scheduled(fixedDelayString = "${file.processor.delayInSecond}", initialDelay = 1000 * 5)
     public void processFiles() {
-        packageService.createMissingFolders();
+        commonService.createMissingFolders();
 
-        File processPackage = new File(packageService.processDir);
+        File processPackage = new File(commonService.processDir);
         Set<File> files = Stream.of(processPackage.listFiles()).filter(file -> !file.isDirectory()).collect(Collectors.toSet());
 
-        LOGGER.info("Found files for report. Count: {}", files.size());
+        LOGGER.info("Found files for scan. Count: {}", files.size());
 
         files.forEach(this::processFile);
     }
@@ -61,29 +55,14 @@ public class FileProcessorService {
         try {
             ScanResponse response = fileScanIOClient.scanFile(file);
             LOGGER.debug("Response: {}", response);
-            saveFileProcess(file.getName(), response.getFlowId());
-            file.renameTo(new File(packageService.finishedDir + "/" + file.getName()));
+            commonService.createFileProcess(file.getName(), response.getFlowId());
+            file.renameTo(new File(commonService.finishedDir + "/" + file.getName()));
             return response.getFlowId();
         } catch (Exception e) {
             LOGGER.warn("Error during [{}] file process", file.getName(), e);
-            file.renameTo(new File(packageService.failedDir + "/" + file.getName()));
+            file.renameTo(new File(commonService.failedDir + "/" + file.getName()));
         }
         return null;
-    }
-
-    /**
-     * Create an entity object for FileProcess
-     *
-     * @param fileName name of file which was analyzed
-     * @param flowId   unique id of analyze
-     */
-    private void saveFileProcess(String fileName, String flowId) {
-        FileProcess fileProcess = new FileProcess();
-        fileProcess.setFileName(fileName);
-        fileProcess.setFlowId(flowId);
-        fileProcess.setLastCheckDate(new Date());
-        fileProcess.setStatus(FileProcessStatus.IN_PROGRESS);
-        fileProcessRepository.save(fileProcess);
     }
 
     /**
@@ -93,8 +72,8 @@ public class FileProcessorService {
      * @return flowId  unique id of analyze
      */
     public String processMultipartFile(MultipartFile multipartFile) {
-        packageService.createMissingFolders();
-        File file = new File(packageService.tempDir + "/" + UUID.randomUUID());
+        commonService.createMissingFolders();
+        File file = new File(commonService.tempDir + "/" + UUID.randomUUID());
         try {
             InputStream initialStream = multipartFile.getInputStream();
             byte[] buffer = new byte[initialStream.available()];

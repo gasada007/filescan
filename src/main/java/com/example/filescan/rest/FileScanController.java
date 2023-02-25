@@ -2,6 +2,7 @@ package com.example.filescan.rest;
 
 import com.example.filescan.service.FileProcessorService;
 import com.example.filescan.service.FileReportService;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,10 +39,10 @@ public class FileScanController {
     }
 
     /**
-     * Trigger the file process and report
+     * Collect the report for scan
      */
     @RequestMapping(method = GET, path = "report")
-    String getReport(@RequestParam("flowId") String flowId) {
+    String getReport(@NotNull @RequestParam("flowId") String flowId) {
         return fileReportService.getFileReport(flowId);
     }
 
