@@ -8,6 +8,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Report {
-    private String overallState;
     private FinalVerdict finalVerdict;
 }

@@ -69,11 +69,12 @@ public class FileProcessorService {
      * Convert MultipartFile to File and call @processFile
      *
      * @param multipartFile a file from rest api request
+     * @param fileName name of the file
      * @return flowId  unique id of analyze
      */
-    public String processMultipartFile(MultipartFile multipartFile) {
+    public String processMultipartFile(MultipartFile multipartFile, String fileName) {
         commonService.createMissingFolders();
-        File file = new File(commonService.tempDir + "/" + UUID.randomUUID());
+        File file = new File(commonService.tempDir + "/" + fileName);
         try {
             InputStream initialStream = multipartFile.getInputStream();
             byte[] buffer = new byte[initialStream.available()];

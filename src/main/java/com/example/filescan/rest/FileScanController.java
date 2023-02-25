@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.UUID;
+
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
@@ -31,7 +33,7 @@ public class FileScanController {
      */
     @RequestMapping(method = POST, path = "scan/file")
     String scanFile(@RequestParam("file") MultipartFile multipartFile) {
-        String flowId = fileProcessorService.processMultipartFile(multipartFile);
+        String flowId = fileProcessorService.processMultipartFile(multipartFile, UUID.randomUUID().toString());
         if (flowId == null) {
             return null;
         }
