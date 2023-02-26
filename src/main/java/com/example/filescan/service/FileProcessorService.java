@@ -39,7 +39,7 @@ public class FileProcessorService {
         File processPackage = new File(commonService.processDir);
         Set<File> files = Stream.of(processPackage.listFiles()).filter(file -> !file.isDirectory()).collect(Collectors.toSet());
 
-        LOGGER.info("Found files for scan. Count: {}", files.size());
+        LOGGER.info("Count(s) of files for scan: {}", files.size());
 
         files.forEach(this::processFile);
     }

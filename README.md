@@ -30,10 +30,7 @@ Need Maven on machine , and use this command : `mvn clean install`
 
 After the previous step copy the created `jar` file into run package next to it `application.properties`
 
-Need JRE 19 on machine, and use this command:
-
-    macOS: `java -jar filescan-0.0.1-SNAPSHOT.jar`
-    Windows: `call java -jar filescan-0.0.1-SNAPSHOT.jar`
+Need JRE 19 on machine, and use this command: `java -jar filescan-0.0.1-SNAPSHOT.jar`
 
 ## Use app
 

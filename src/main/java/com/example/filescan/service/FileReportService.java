@@ -41,7 +41,7 @@ public class FileReportService {
 
         List<FileProcess> files = commonService.findByStatus(FileProcessStatus.IN_PROGRESS);
 
-        LOGGER.info("Count(s) of file for report: {}", files.size());
+        LOGGER.info("Count(s) of files for report: {}", files.size());
 
         files.forEach(this::fileReport);
     }
