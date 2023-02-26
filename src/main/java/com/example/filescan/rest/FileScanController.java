@@ -35,7 +35,7 @@ public class FileScanController {
     String scanFile(@RequestParam("file") MultipartFile multipartFile) {
         String flowId = fileProcessorService.processMultipartFile(multipartFile, UUID.randomUUID().toString());
         if (flowId == null) {
-            return null;
+            return "Something wrong happened with file process try again later or with other file.";
         }
         return fileReportService.getFileReport(flowId);
     }

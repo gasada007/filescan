@@ -41,7 +41,7 @@ public class FileReportService {
 
         List<FileProcess> files = commonService.findByStatus(FileProcessStatus.IN_PROGRESS);
 
-        LOGGER.info("Found file for report. Count: {}", files.size());
+        LOGGER.info("Count(s) of file for report: {}", files.size());
 
         files.forEach(this::fileReport);
     }
@@ -86,7 +86,7 @@ public class FileReportService {
             myWriter.write(responseData);
             myWriter.close();
         } catch (Exception e) {
-            LOGGER.warn("Error during [{}] file reports", file.getFlowId(), e);
+            LOGGER.warn("Error during save report in dir under [{}] file reports", file.getFlowId(), e);
         }
     }
 

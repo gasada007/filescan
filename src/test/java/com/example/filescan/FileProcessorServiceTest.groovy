@@ -122,4 +122,21 @@ class FileProcessorServiceTest extends HelperBase {
             "file failed "  | null                       || String.valueOf(FAILED_DIR + "/dummy.txt")   | null      | 1            | 0
             "file finished" | new ScanResponse("flowId") || String.valueOf(FINISHED_DIR + "/dummy.txt") | "flowId"  | 1            | 1
     }
+
+//    def 'generate lot of file'() {
+//        setup:
+//            def fileProcessorService = new FileProcessorService(new CommonService(Mock(FileProcessRepository.class)), Mock(FileScanIOClient.class))
+//            setupPaths(fileProcessorService.commonService)
+//
+//            removeFileOrDir("files")
+//            fileProcessorService.commonService.createMissingFolders()
+//
+//        when:
+//            for(int i = 0; i < 100; i++) {
+//                createFile(PROCESS_DIR + "/dummy_" + i + ".txt", "Dummy data_" + i as String)
+//            }
+//
+//        then:
+//            0 * _
+//    }
 }
